@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Canine ECG Transfer Learning from MIT-BIH Pretrained Model
 """

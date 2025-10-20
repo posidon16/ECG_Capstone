@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Test script for binary transfer learning model
 Tests the canine_finetuned_binary.h5 model on enhanced preprocessed data

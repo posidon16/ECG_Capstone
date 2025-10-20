@@ -37,7 +37,7 @@ First: transfer_cainine_v2.py this classifies as a binary Normal or Arrhythmia
 
 Second: train_subclassifier_s_vs_v.py this is the subclassifier to classify the arrhythmias
 
-That is the training done.
+## That is the training done.
 
 Now run test_hierarchical_canine.py This will test against the test set we created earlier
 

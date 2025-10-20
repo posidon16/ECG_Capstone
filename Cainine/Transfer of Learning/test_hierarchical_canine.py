@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Canine ECG - Hierarchical Classification Testing
 2-Stage System: Stage 1 (N vs Arrhythmia) + Stage 2 (S vs V)
