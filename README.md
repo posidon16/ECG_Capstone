@@ -1,7 +1,7 @@
 # ECG_Capstone
 My Capstone ECG Project
 
-Pre Requisites:
+## Pre Requisites:
 
 This was created using python 3.11
 
@@ -13,7 +13,7 @@ OR Use the environment.yml file to create a conda environment
 
 conda env create -f environment.yml
 
-Running:
+## Running:
 
 The order in which to run the files to get results is the following:
 
