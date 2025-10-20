@@ -1,0 +1,162 @@
+# ECG Capstone Project - Git Ignore File
+
+# ============================================================================
+# Large Data Files (use Google Drive instead)
+# ============================================================================
+
+# Downloaded zip files
+all_data.zip
+mitbih_data.zip
+
+# Raw canine ECG data (download with download_data.py)
+Cainine/all_data/
+
+# MIT-BIH ECG data (download with download_data.py)
+MITBIH/Data/*.csv
+!MITBIH/Data/.gitkeep
+
+# Preprocessed data (generated from raw data)
+Cainine/DataPreProcessing/PreProcessedData/*.csv
+!Cainine/DataPreProcessing/PreProcessedData/.gitkeep
+
+# Old/duplicate MITBIH input folders (to be removed)
+MITBIH/binary_model/input/*.csv
+MITBIH/model_arxiv-1805-00794/Data/input/*.csv
+
+# ============================================================================
+# Model Files (trained models can be large)
+# ============================================================================
+
+# Trained models
+*.h5
+*.keras
+*.pkl
+*.joblib
+*.pt
+*.pth
+*.ckpt
+
+# Model checkpoints
+checkpoints/
+*.ckpt.*
+
+# ============================================================================
+# Python
+# ============================================================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# ============================================================================
+# Jupyter Notebook
+# ============================================================================
+
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# Jupyter Notebook outputs (optional - comment out if you want to keep outputs)
+# *.ipynb
+
+# ============================================================================
+# IDE / Editor
+# ============================================================================
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+
+# Spyder
+.spyderproject
+.spyproject
+
+# ============================================================================
+# Data Science / ML
+# ============================================================================
+
+# TensorBoard logs
+logs/
+tensorboard_logs/
+runs/
+
+# Datasets (if not already covered)
+*.csv.gz
+*.csv.zip
+*.npy
+*.npz
+
+# Plots and figures (optional - comment out if you want to track them)
+# *.png
+# *.jpg
+# *.pdf
+
+# ============================================================================
+# Operating System
+# ============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# ============================================================================
+# Project Specific
+# ============================================================================
+
+# Output directories
+**/output/
+**/outputs/
+**/*_out/
+**/*_output/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+*.7z
