@@ -9,7 +9,7 @@ To run, install the requirements.txt run:
 
 pip install -r requirements.txt
 
-OR Use the environment.yml file to create a conda environment 
+  Use the environment.yml file to create a conda environment 
 
 conda env create -f environment.yml
 

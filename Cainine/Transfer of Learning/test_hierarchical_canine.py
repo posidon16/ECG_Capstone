@@ -493,12 +493,6 @@ def main():
     print("\n" + "="*70)
     print("TESTING COMPLETE - CANINE HIERARCHICAL SYSTEM EVALUATED!")
     print("="*70)
-
-    print("\nNext steps:")
-    print("1. Compare canine results with MIT-BIH baseline")
-    print("2. Analyze transfer learning effectiveness")
-    print("3. Document findings for capstone paper")
-
-
+   
 if __name__ == "__main__":
     main()

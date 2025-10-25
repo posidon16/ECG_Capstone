@@ -14,7 +14,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
 
 # Configuration (relative paths)
-MODEL_PATH = os.path.join(SCRIPT_DIR, "canine_tl_out_v2", "canine_finetuned_binary.h5")
+MODEL_PATH = os.path.join(SCRIPT_DIR, "canine_models", "canine_finetuned_binary.h5")
 DATA_PATH = os.path.join(PROJECT_ROOT, "Cainine", "DataPreProcessing", "PreProcessedData", "canine_test.csv")
 
 def load_and_remap_data(csv_path: str, include_s_beats: bool = True):
