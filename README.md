@@ -13,11 +13,11 @@ pip install -r requirements.txt
 
 conda env create -f environment.yml
 
-## Running Human:
-
-The order in which to run the files to get results is the following:
+## The order in which to run the files to get results is the following:
 
 First run the download_data.py This will download the necessary data, Make sure you have at least 3GB free for the download. You will need a total of 16GB for the whole project to run.
+
+## Running Human:
 
 Next Navigate to MITBIH\model_arxiv-1805-00794 and in that folder run original_model-from-arxiv-1805-00794.ipynb from start to end. This will leave you with the baseline Human model
 
