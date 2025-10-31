@@ -592,12 +592,11 @@ Examples:
     print(f"Total beats written: {total_written}")
     print(f"Total beats skipped: {total_skipped}")
 
-    print(f"\nTRAIN SET (all files EXCEPT 413, 102):")
+    print(f"\nTRAIN SET:")
     print(f"  Beats written: {train_files_written:,}")
     print(f"  Beats skipped: {train_files_skipped:,}")
-    print(f"  NOTE: File 301 IS INCLUDED in train set")
 
-    print(f"\nTEST SET (files 413, 102 only):")
+    print(f"\nTEST SET:")
     print(f"  Beats written: {test_files_written:,}")
     print(f"  Beats skipped: {test_files_skipped:,}")
 
