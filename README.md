@@ -13,7 +13,7 @@ pip install -r requirements.txt
 
 conda env create -f environment.yml
 
-## Running:
+## Running Human:
 
 The order in which to run the files to get results is the following:
 
@@ -23,23 +23,54 @@ Next Navigate to MITBIH\model_arxiv-1805-00794 and in that folder run original_m
 
 Sidebar Here, for comparision there is also a binary model inside binary_model folder, this is to show that the method I use for the cainine is also applicable here.
 
-After creating the human model, then move accorss to the Cainine folder Navigate to: Cainine\DataPreProcessing and run:
+## Preprocessing Canine:
+Navigate to: Cainine\DataPreProcessing_Inter for Interpatient Data or Cainine\DataPreProcessing_Intra for Intra patient data and run:
 
+### Intra:
 First: enhanced_preprocessing.py
 
 Second: create_train_test_split.py
 
 This will process that data and create our test and train datasets.
 
-Navigate to Cainine\Transfer of Learning and then run:
+### Inter:
+Run enhanced_preprocessing.py
 
-First: transfer_cainine_v2.py this classifies as a binary Normal or Arrhythmia
+## Running Canine:
+Navigate to Cainine\Transfer of Learning\01_baseline and then:
 
-Second: train_subclassifier_s_vs_v.py this is the subclassifier to classify the arrhythmias
+### Inter (Currently set)
 
-## That is the training done.
+First Run train_stage1_original.py
 
-Now run test_hierarchical_canine.py This will test against the test set we created earlier
+Second Run train_stage2.py
+
+Third Run test_hierarchical.py
+
+#### Threshold analysis:
+If the threshold which is currently set for stage 1 is failing (currently set for Inter)
+
+Run analyze_threshold.py 
+
+This will give an output of a threshold which you can set in the test_hierarchical.py on line 54
+
+### Intra (Not Currently set)
+
+#### Update Values for Intra:
+
+train_stage1_original.py Line 33 update "DataPreProcessing_Inter" to "DataPreProcessing_Intra"
+
+train_stage2.py Line 44 "DataPreProcessing_Inter" to "DataPreProcessing_Intra"
+
+test_hierarchical.py Line 44 "DataPreProcessing_Inter" to "DataPreProcessing_Intra"
+
+#### Run:
+
+First Run train_stage1_original.py
+
+Second Run train_stage2.py
+
+Third Run test_hierarchical.py
 
 And the results you see are now the results from the model on the cainine data.
 
