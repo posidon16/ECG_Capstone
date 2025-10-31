@@ -27,12 +27,12 @@ from sklearn.metrics import (
 class CFG:
     # Get script directory for relative paths
     SCRIPT_DIR: str = os.path.dirname(os.path.abspath(__file__))
-    PROJECT_ROOT: str = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+    PROJECT_ROOT: str = os.path.dirname(os.path.dirname(os.path.dirname(SCRIPT_DIR)))
 
     # --- Paths (relative) ---
-    CANINE_TRAIN_GLOB: str = os.path.join(PROJECT_ROOT, "Cainine", "DataPreProcessing", "PreProcessedData", "canine_train.csv")
+    CANINE_TRAIN_GLOB: str = os.path.join(PROJECT_ROOT, "Cainine", "DataPreProcessing_TEST", "PreProcessedData", "canine_train.csv")
     BASE_MODEL_PATH:   str = os.path.join(PROJECT_ROOT, "MITBIH", "model_arxiv-1805-00794", "best_model.h5")
-    OUTPUT_DIR:        str = os.path.join(SCRIPT_DIR, "canine_models")
+    OUTPUT_DIR:        str = os.path.join(SCRIPT_DIR, "models")
 
     # --- Data layout ---
     LABEL_COL_NAME:    str = "label"   # last column; integer-coded
@@ -365,12 +365,12 @@ def main():
         # Save probabilities for further analysis
         np.save(os.path.join(CFG.OUTPUT_DIR, "val_probs.npy"), y_val_prob)
         np.save(os.path.join(CFG.OUTPUT_DIR, "val_labels.npy"), y_val)
-        model.save(os.path.join(CFG.OUTPUT_DIR, "canine_finetuned_binary.h5"))
+        model.save(os.path.join(CFG.OUTPUT_DIR, "canine_binary_original.h5"))
     else:
         print("[step] Evaluating (multi-class) …")
         val_metrics = model.evaluate(ds_val, verbose=0)
         print(dict(zip(model.metrics_names, val_metrics)))
-        model.save(os.path.join(CFG.OUTPUT_DIR, "canine_finetuned_multiclass.h5"))
+        model.save(os.path.join(CFG.OUTPUT_DIR, "canine_multiclass_original.h5"))
 
 if __name__ == "__main__":
     main()

@@ -38,11 +38,11 @@ from sklearn.metrics import (
 class Config:
     # Get script directory for relative paths
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-    PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+    PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(SCRIPT_DIR)))
 
     # Paths (relative)
-    DATA_FILE = os.path.join(PROJECT_ROOT, "Cainine", "DataPreProcessing", "PreProcessedData", "canine_train.csv")
-    OUTPUT_DIR = os.path.join(SCRIPT_DIR, "canine_subclass_s_v")
+    DATA_FILE = os.path.join(PROJECT_ROOT, "Cainine", "DataPreProcessing_TEST", "PreProcessedData", "canine_train.csv")
+    OUTPUT_DIR = os.path.join(SCRIPT_DIR, "models")
 
     # Data
     INPUT_LEN = 187  # Padded to match MIT-BIH model input
@@ -436,12 +436,6 @@ def main():
 
     config = Config()
     model, history = train_model(config)
-
-    print("\nNext steps:")
-    print("1. Test Stage 2 model on hold-out data")
-    print("2. Combine with Stage 1 (canine_finetuned_binary.h5) for hierarchical classification")
-    print("3. Evaluate complete 2-stage system")
-
 
 if __name__ == "__main__":
     main()

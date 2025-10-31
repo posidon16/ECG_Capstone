@@ -13,6 +13,7 @@ imbalanced-learn
 
 # ECG data processing
 wfdb
+PyWavelets
 
 # Utilities
 glob2

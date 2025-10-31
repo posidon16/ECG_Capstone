@@ -25,6 +25,9 @@ from sklearn.metrics import (
     roc_auc_score
 )
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 # ============================================================================
 # CONFIGURATION
 # ============================================================================
@@ -33,21 +36,22 @@ from sklearn.metrics import (
 class Config:
     # Get script directory for relative paths
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-    PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+    TRANSFER_LEARNING_DIR = os.path.dirname(SCRIPT_DIR)
+    PROJECT_ROOT = os.path.dirname(os.path.dirname(TRANSFER_LEARNING_DIR))
 
     # Paths (relative)
     # Use dedicated test set created by create_train_test_split.py
-    TEST_DATA = os.path.join(PROJECT_ROOT, "Cainine", "DataPreProcessing", "PreProcessedData", "canine_test.csv")
+    TEST_DATA = os.path.join(PROJECT_ROOT, "Cainine", "DataPreProcessing_Inter", "PreProcessedData", "canine_test.csv")
 
     # Models
-    STAGE1_MODEL = os.path.join(SCRIPT_DIR, "canine_models", "canine_finetuned_binary.h5")
-    STAGE2_MODEL = os.path.join(SCRIPT_DIR, "canine_subclass_s_v", "best_canine_subclass_s_v.h5")
+    STAGE1_MODEL = os.path.join(SCRIPT_DIR, "models", "canine_binary_original.h5")
+    STAGE2_MODEL = os.path.join(TRANSFER_LEARNING_DIR, "stage2_models", "models", "best_canine_subclass_s_v.h5")
 
     # Data
     INPUT_LEN = 187  # Padded to match MIT-BIH model input
 
     # Thresholds
-    STAGE1_THRESHOLD = 0.5  # N vs Arrhythmia
+    STAGE1_THRESHOLD = 0.0101  # N vs Arrhythmia (optimized for 80% recall)
     STAGE2_THRESHOLD = 0.5  # S vs V
 
     SEED = 1337
@@ -170,7 +174,7 @@ class HierarchicalCanineClassifier:
         self.stage2_model = load_model(stage2_path)
         self.stage2_threshold = stage2_threshold
 
-        print("✓ Models loaded successfully")
+        print("Models loaded successfully")
 
     def predict_batch(self, X, verbose=True):
         """
@@ -238,10 +242,89 @@ class HierarchicalCanineClassifier:
 
 
 # ============================================================================
+# VISUALIZATION
+# ============================================================================
+
+def plot_confusion_matrix(cm, labels, title, filename, output_dir='.'):
+    """
+    Plot and save confusion matrix
+
+    Args:
+        cm: Confusion matrix array
+        labels: List of class labels
+        title: Plot title
+        filename: Output filename
+        output_dir: Directory to save plot
+    """
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+                xticklabels=labels,
+                yticklabels=labels,
+                cbar_kws={'label': 'Count'})
+
+    plt.title(title, fontsize=16, fontweight='bold')
+    plt.ylabel('True Label', fontsize=14)
+    plt.xlabel('Predicted Label', fontsize=14)
+    plt.tight_layout()
+
+    output_path = os.path.join(output_dir, filename)
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    print(f"   Saved: {output_path}")
+    plt.close()
+
+
+def plot_all_confusion_matrices(cm_stage1, cm_stage2, cm_final, output_dir='.'):
+    """
+    Generate all confusion matrix plots for hierarchical system
+
+    Args:
+        cm_stage1: Stage 1 confusion matrix (N vs Arrhythmia)
+        cm_stage2: Stage 2 confusion matrix (S vs V)
+        cm_final: Final 3-class confusion matrix
+        output_dir: Directory to save plots
+    """
+    print("\n" + "="*70)
+    print("GENERATING CONFUSION MATRIX VISUALIZATIONS")
+    print("="*70)
+
+    # Stage 1: N vs Arrhythmia
+    print("\n1. Stage 1 Confusion Matrix (Normal vs Arrhythmia)...")
+    plot_confusion_matrix(
+        cm_stage1,
+        labels=['Normal', 'Arrhythmia'],
+        title='Stage 1: Binary Classification (Normal vs Arrhythmia)',
+        filename='canine_stage1_confusion_matrix.png',
+        output_dir=output_dir
+    )
+
+    # Stage 2: S vs V
+    print("\n2. Stage 2 Confusion Matrix (S vs V)...")
+    plot_confusion_matrix(
+        cm_stage2,
+        labels=['S (Supraventricular)', 'V (Ventricular)'],
+        title='Stage 2: Arrhythmia Sub-Classification (S vs V)',
+        filename='canine_stage2_confusion_matrix.png',
+        output_dir=output_dir
+    )
+
+    # Final: 3-class
+    print("\n3. Final 3-Class Confusion Matrix (N, S, V)...")
+    plot_confusion_matrix(
+        cm_final,
+        labels=['N (Normal)', 'S (Supraventricular)', 'V (Ventricular)'],
+        title='Final: Hierarchical 3-Class Classification (Canine ECG)',
+        filename='canine_final_confusion_matrix.png',
+        output_dir=output_dir
+    )
+
+    print("\nAll confusion matrices saved successfully!")
+
+
+# ============================================================================
 # EVALUATION
 # ============================================================================
 
-def evaluate_hierarchical_system(classifier, X_test, y_true_3class, y_true_binary):
+def evaluate_hierarchical_system(classifier, X_test, y_true_3class, y_true_binary, output_dir='.'):
     """
     Comprehensive evaluation of hierarchical system
 
@@ -297,48 +380,50 @@ def evaluate_hierarchical_system(classifier, X_test, y_true_3class, y_true_binar
     print("STAGE 2: Arrhythmia Sub-classification (S vs V)")
     print("="*70)
 
-    # Filter to only true arrhythmia cases
+    # Filter to only true arrhythmia cases THAT REACHED STAGE 2
+    # (i.e., correctly identified as arrhythmia in Stage 1)
     arrhythmia_mask = y_true_binary == 1
     y_true_arrhythmia = y_true_3class[arrhythmia_mask]  # Should be 1 or 2
+    y_pred_arrhythmia = y_pred_3class[arrhythmia_mask]  # Final predictions for true arrhythmias
     stage2_probs_arrhythmia = stage2_probs[arrhythmia_mask]
 
     # Filter out NaN values (cases not sent to Stage 2)
     # This happens when Stage 1 misclassifies arrhythmia as Normal
     valid_mask = ~np.isnan(stage2_probs_arrhythmia)
     y_true_stage2_valid = y_true_arrhythmia[valid_mask]
+    y_pred_stage2_valid = y_pred_arrhythmia[valid_mask]
     stage2_probs_valid = stage2_probs_arrhythmia[valid_mask]
 
     # Binary labels for Stage 2: S=0, V=1
-    y_true_stage2 = (y_true_arrhythmia == 2).astype(int)  # V=1, S=0 (all true arrhythmia)
-    y_true_stage2_valid = (y_true_stage2_valid == 2).astype(int)  # V=1, S=0 (only those sent to Stage 2)
+    # ONLY evaluate on cases that actually reached Stage 2
+    y_true_stage2_binary = (y_true_stage2_valid == 2).astype(int)  # V=1, S=0
+    y_pred_stage2_binary = (y_pred_stage2_valid == 2).astype(int)  # V=1, S=0
 
-    y_pred_stage2 = (stage2_probs_arrhythmia >= classifier.stage2_threshold).astype(int)
-    y_pred_stage2_valid = (stage2_probs_valid >= classifier.stage2_threshold).astype(int)
-
-    print(f"\nEvaluating on {len(y_true_stage2):,} true arrhythmia cases...")
+    print(f"\nEvaluating on {len(y_true_arrhythmia):,} true arrhythmia cases...")
     if not valid_mask.all():
         n_missing = np.sum(~valid_mask)
         print(f"  Note: {n_missing:,} arrhythmia cases were misclassified as Normal in Stage 1")
         print(f"  Stage 2 metrics calculated on {len(y_true_stage2_valid):,} cases that reached Stage 2")
 
-    print("\nClassification Report:")
+    print("\nClassification Report (on cases that reached Stage 2):")
     print(classification_report(
-        y_true_stage2, y_pred_stage2,
+        y_true_stage2_binary, y_pred_stage2_binary,
         target_names=['Supraventricular (S)', 'Ventricular (V)'],
         digits=4
     ))
 
-    # Confusion matrix
-    cm_stage2 = confusion_matrix(y_true_stage2, y_pred_stage2)
-    print("\nConfusion Matrix:")
+    # Confusion matrix (only on cases that reached Stage 2)
+    cm_stage2 = confusion_matrix(y_true_stage2_binary, y_pred_stage2_binary)
+    print("\nConfusion Matrix (among cases that reached Stage 2):")
     print("             Predicted")
     print("               S      V")
     print(f"Actual S    {cm_stage2[0,0]:5d}  {cm_stage2[0,1]:5d}")
     print(f"       V    {cm_stage2[1,0]:5d}  {cm_stage2[1,1]:5d}")
 
-    # Metrics (use valid subset for ROC-AUC to avoid NaN issues)
-    acc_stage2 = accuracy_score(y_true_stage2, y_pred_stage2)
-    roc_auc_stage2 = roc_auc_score(y_true_stage2_valid, stage2_probs_valid) if len(y_true_stage2_valid) > 0 else 0.0
+    # Metrics
+    acc_stage2 = accuracy_score(y_true_stage2_binary, y_pred_stage2_binary) if len(y_true_stage2_binary) > 0 else 0.0
+    # FIX #1: Pass probabilities directly to ROC-AUC, not thresholded boolean
+    roc_auc_stage2 = roc_auc_score(y_true_stage2_binary, stage2_probs_valid) if len(y_true_stage2_valid) > 0 else 0.0
 
     print(f"\nStage 2 Metrics:")
     print(f"  Accuracy: {acc_stage2:.4f}")
@@ -400,8 +485,8 @@ def evaluate_hierarchical_system(classifier, X_test, y_true_3class, y_true_binar
     false_positives = np.sum((y_true_binary == 0) & (y_pred_binary == 1))  # N classified as Arrhythmia
     false_negatives = np.sum((y_true_binary == 1) & (y_pred_binary == 0))  # Arrhythmia classified as N
 
-    print(f"  False Positives (N → Arrhythmia): {false_positives:,}")
-    print(f"  False Negatives (Arrhythmia → N): {false_negatives:,}")
+    print(f"  False Positives (N -> Arrhythmia): {false_positives:,}")
+    print(f"  False Negatives (Arrhythmia -> N): {false_negatives:,}")
 
     # Stage 2 errors (among correctly identified arrhythmias)
     correctly_identified_arrhythmia = (y_true_binary == 1) & (y_pred_binary == 1)
@@ -413,6 +498,11 @@ def evaluate_hierarchical_system(classifier, X_test, y_true_3class, y_true_binar
         print(f"\nStage 2 errors (S vs V, among correctly identified arrhythmias): {stage2_errors:,}")
         print(f"  Out of {np.sum(correctly_identified_arrhythmia):,} correctly identified arrhythmias")
         print(f"  Error rate: {100*stage2_errors/np.sum(correctly_identified_arrhythmia):.2f}%")
+
+    # ========================================================================
+    # Generate Confusion Matrix Plots
+    # ========================================================================
+    plot_all_confusion_matrices(cm_stage1, cm_stage2, cm_final, output_dir=output_dir)
 
     print("\n" + "="*70)
     print("EVALUATION COMPLETE")
@@ -427,6 +517,8 @@ def evaluate_hierarchical_system(classifier, X_test, y_true_3class, y_true_binar
         'final_precision': precision,
         'final_recall': recall,
         'final_f1': f1,
+        'confusion_matrix_stage1': cm_stage1,
+        'confusion_matrix_stage2': cm_stage2,
         'confusion_matrix_final': cm_final
     }
 
@@ -468,9 +560,12 @@ def main():
         stage2_threshold=config.STAGE2_THRESHOLD
     )
 
+    # Set output directory (same as script directory)
+    output_dir = config.SCRIPT_DIR
+
     # Evaluate
     results = evaluate_hierarchical_system(
-        classifier, X_test, y_test_3class, y_test_binary
+        classifier, X_test, y_test_3class, y_test_binary, output_dir=output_dir
     )
 
     print("\n" + "="*70)
@@ -489,6 +584,14 @@ def main():
     print(f"  Macro Precision: {results['final_precision']:.4f}")
     print(f"  Macro Recall: {results['final_recall']:.4f}")
     print(f"  Macro F1-Score: {results['final_f1']:.4f}")
+
+    print("\n" + "="*70)
+    print("GENERATED CONFUSION MATRIX PLOTS")
+    print("="*70)
+    print(f"\nConfusion matrices saved to: {output_dir}")
+    print("  - canine_stage1_confusion_matrix.png (N vs Arrhythmia)")
+    print("  - canine_stage2_confusion_matrix.png (S vs V)")
+    print("  - canine_final_confusion_matrix.png (3-class N/S/V)")
 
     print("\n" + "="*70)
     print("TESTING COMPLETE - CANINE HIERARCHICAL SYSTEM EVALUATED!")
