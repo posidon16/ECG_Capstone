@@ -12,13 +12,13 @@ Features:
 
 Usage:
     # Specify test files
-    python enhanced_preprocessing_custom.py --test-files 413 102
+    python enhanced_preprocessing_choose.py --test-files 413 102
 
     # Use single test file
-    python enhanced_preprocessing_custom.py --test-files 301
+    python enhanced_preprocessing_choose.py --test-files 301
 
     # Use default (413, 102)
-    python enhanced_preprocessing_custom.py
+    python enhanced_preprocessing_choose.py
 """
 
 import csv
@@ -427,16 +427,16 @@ def main():
         epilog="""
 Examples:
   # Use specific files for test set
-  python enhanced_preprocessing_custom.py --test-files 413 102
+  python enhanced_preprocessing_choose.py --test-files 413 102
 
   # Use single file for test set
-  python enhanced_preprocessing_custom.py --test-files 301
+  python enhanced_preprocessing_choose.py --test-files 301
 
   # Use default test files (413, 102)
-  python enhanced_preprocessing_custom.py
+  python enhanced_preprocessing_choose.py
 
   # List available files
-  python enhanced_preprocessing_custom.py --list-files
+  python enhanced_preprocessing_choose.py --list-files
         """
     )
 
@@ -513,7 +513,7 @@ Examples:
             print(f"  - {file_num}")
         print(f"\nDefault test files: {args.test_files}")
         print("\nTo use custom test files:")
-        print("  python enhanced_preprocessing_custom.py --test-files 301 413")
+        print("  python enhanced_preprocessing_choose.py --test-files 301 413")
         return
 
     # Use custom test files from command line
