@@ -34,7 +34,15 @@ Second: create_train_test_split.py
 This will process that data and create our test and train datasets.
 
 ### Inter:
-Run enhanced_preprocessing.py
+#### Specify test files
+python enhanced_preprocessing_custom.py --test-files 413 102
+
+#### Use single test file
+python enhanced_preprocessing_custom.py --test-files 301
+
+#### Use default (413, 102)
+python enhanced_preprocessing_custom.py
+
 
 ## Running Canine:
 Navigate to Cainine\Transfer of Learning\01_baseline and then:
