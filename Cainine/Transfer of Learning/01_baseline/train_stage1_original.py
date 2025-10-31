@@ -30,7 +30,7 @@ class CFG:
     PROJECT_ROOT: str = os.path.dirname(os.path.dirname(os.path.dirname(SCRIPT_DIR)))
 
     # --- Paths (relative) ---
-    CANINE_TRAIN_GLOB: str = os.path.join(PROJECT_ROOT, "Cainine", "DataPreProcessing_TEST", "PreProcessedData", "canine_train.csv")
+    CANINE_TRAIN_GLOB: str = os.path.join(PROJECT_ROOT, "Cainine", "DataPreProcessing_Inter", "PreProcessedData", "canine_train.csv")
     BASE_MODEL_PATH:   str = os.path.join(PROJECT_ROOT, "MITBIH", "model_arxiv-1805-00794", "best_model.h5")
     OUTPUT_DIR:        str = os.path.join(SCRIPT_DIR, "models")
 

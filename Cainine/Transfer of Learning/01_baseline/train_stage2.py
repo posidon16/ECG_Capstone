@@ -41,7 +41,7 @@ class Config:
     PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(SCRIPT_DIR)))
 
     # Paths (relative)
-    DATA_FILE = os.path.join(PROJECT_ROOT, "Cainine", "DataPreProcessing_TEST", "PreProcessedData", "canine_train.csv")
+    DATA_FILE = os.path.join(PROJECT_ROOT, "Cainine", "DataPreProcessing_Inter", "PreProcessedData", "canine_train.csv")
     OUTPUT_DIR = os.path.join(SCRIPT_DIR, "models")
 
     # Data
