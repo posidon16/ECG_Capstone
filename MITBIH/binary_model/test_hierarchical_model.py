@@ -340,7 +340,7 @@ def evaluate_hierarchical(y_true, y_pred, probabilities, config):
                     if count > 0:
                         true_name = {0: 'N', 1: 'S', 2: 'V'}[true_label]
                         pred_name = {0: 'N', 1: 'S', 2: 'V'}[pred_label]
-                        print(f"  {true_name} → {pred_name}: {count} samples")
+                        print(f"  {true_name} -> {pred_name}: {count} samples")
 
     # Stage 2 calling statistics
     n_stage2_called = np.sum(probabilities['stage2_called'])
@@ -354,16 +354,25 @@ def evaluate_hierarchical(y_true, y_pred, probabilities, config):
     }
 
 
-def plot_confusion_matrix(y_true, y_pred, title='Hierarchical Model Confusion Matrix'):
+def plot_confusion_matrix(y_true, y_pred, title='Hierarchical Model Confusion Matrix',
+                         filename='hierarchical_confusion_matrix.png',
+                         labels=['N', 'S', 'V']):
     """
     Plot confusion matrix with visualization
+
+    Args:
+        y_true: True labels
+        y_pred: Predicted labels
+        title: Plot title
+        filename: Output filename
+        labels: Class labels for axes
     """
     cm = confusion_matrix(y_true, y_pred)
 
     plt.figure(figsize=(10, 8))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-                xticklabels=['N', 'S', 'V'],
-                yticklabels=['N', 'S', 'V'],
+                xticklabels=labels,
+                yticklabels=labels,
                 cbar_kws={'label': 'Count'})
 
     plt.title(title, fontsize=16, fontweight='bold')
@@ -372,11 +381,60 @@ def plot_confusion_matrix(y_true, y_pred, title='Hierarchical Model Confusion Ma
     plt.tight_layout()
 
     # Save figure
-    output_path = os.path.join(Config.MODEL_DIR, 'hierarchical_confusion_matrix.png')
+    output_path = os.path.join(Config.MODEL_DIR, filename)
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     print(f"\nConfusion matrix plot saved to: {output_path}")
 
-    plt.show()
+    plt.close()
+
+
+def plot_stage_confusion_matrices(y_true, y_pred, probabilities, config):
+    """
+    Plot confusion matrices for each stage of hierarchical classification
+
+    Args:
+        y_true: True labels (0=N, 1=S, 2=V)
+        y_pred: Predicted labels
+        probabilities: Dictionary with probability information
+        config: Configuration object
+    """
+    print("\n" + "="*70)
+    print("GENERATING STAGE-WISE CONFUSION MATRIX PLOTS")
+    print("="*70)
+
+    # Stage 1: N vs Arrhythmia
+    y_true_binary = (y_true > 0).astype(int)  # 0=N, 1=Arrhythmia
+    y_pred_stage1 = (probabilities['p_arrhythmia'] >= config.STAGE1_THRESHOLD).astype(int)
+
+    print("\nPlotting Stage 1 confusion matrix (Normal vs Arrhythmia)...")
+    plot_confusion_matrix(
+        y_true_binary,
+        y_pred_stage1,
+        title='Stage 1: Binary Classification (Normal vs Arrhythmia)',
+        filename='stage1_confusion_matrix.png',
+        labels=['Normal', 'Arrhythmia']
+    )
+
+    # Stage 2: S vs V (only on actual arrhythmias)
+    mask_true_arr = y_true > 0
+    if np.sum(mask_true_arr) > 0:
+        y_true_s_v = y_true[mask_true_arr]  # 1=S, 2=V
+        y_pred_s_v = y_pred[mask_true_arr]
+
+        # Convert to binary for S vs V
+        y_true_s_v_binary = (y_true_s_v == 2).astype(int)  # 0=S, 1=V
+        y_pred_s_v_binary = (y_pred_s_v == 2).astype(int)
+
+        print("\nPlotting Stage 2 confusion matrix (Supraventricular vs Ventricular)...")
+        plot_confusion_matrix(
+            y_true_s_v_binary,
+            y_pred_s_v_binary,
+            title='Stage 2: Sub-Classification (Supraventricular vs Ventricular)',
+            filename='stage2_confusion_matrix.png',
+            labels=['S (Supraventricular)', 'V (Ventricular)']
+        )
+
+    print("\nAll stage-wise confusion matrices generated successfully!")
 
 
 # ============================================================================
@@ -414,9 +472,15 @@ def main():
     # Evaluate
     results = evaluate_hierarchical(y_test, y_pred, probabilities, config)
 
-    # Plot confusion matrix
+    # Plot overall 3-class confusion matrix
+    print("\nPlotting overall 3-class confusion matrix...")
     plot_confusion_matrix(y_test, y_pred,
-                         title='Hierarchical Model (2-Stage) - Test Set Performance')
+                         title='Hierarchical Model (2-Stage) - Test Set Performance',
+                         filename='hierarchical_confusion_matrix.png',
+                         labels=['N', 'S', 'V'])
+
+    # Plot stage-wise confusion matrices
+    plot_stage_confusion_matrices(y_test, y_pred, probabilities, config)
 
     # Summary
     print("\n" + "="*70)
